@@ -171,7 +171,7 @@ namespace TeamDesk.Api.Migrations
                             Id = 1,
                             Email = "karim@teamdesk.local",
                             Name = "Karim Manager",
-                            PasswordHash = "TEMP",
+                            PasswordHash = "AQAAAAIAAYagAAAAELvS9PsS+t505UmPGlCsMXE8r1UEWTE8elW5WLjvmYnBEchMzeIn+Grk3AGM8BLQ0w==",
                             Role = 1
                         },
                         new
@@ -179,7 +179,7 @@ namespace TeamDesk.Api.Migrations
                             Id = 2,
                             Email = "sara@teamdesk.local",
                             Name = "Sara User",
-                            PasswordHash = "TEMP",
+                            PasswordHash = "AQAAAAIAAYagAAAAELvS9PsS+t505UmPGlCsMXE8r1UEWTE8elW5WLjvmYnBEchMzeIn+Grk3AGM8BLQ0w==",
                             Role = 0
                         },
                         new
@@ -187,7 +187,23 @@ namespace TeamDesk.Api.Migrations
                             Id = 3,
                             Email = "yassine@teamdesk.local",
                             Name = "Yassine Tech",
-                            PasswordHash = "TEMP",
+                            PasswordHash = "AQAAAAIAAYagAAAAELvS9PsS+t505UmPGlCsMXE8r1UEWTE8elW5WLjvmYnBEchMzeIn+Grk3AGM8BLQ0w==",
+                            Role = 0
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Email = "omar@gamil.com",
+                            Name = "Omar Manager",
+                            PasswordHash = "AQAAAAIAAYagAAAAELvS9PsS+t505UmPGlCsMXE8r1UEWTE8elW5WLjvmYnBEchMzeIn+Grk3AGM8BLQ0w==",
+                            Role = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Email = "user@gamil.com",
+                            Name = "user user",
+                            PasswordHash = "AQAAAAIAAYagAAAAELvS9PsS+t505UmPGlCsMXE8r1UEWTE8elW5WLjvmYnBEchMzeIn+Grk3AGM8BLQ0w==",
                             Role = 0
                         });
                 });

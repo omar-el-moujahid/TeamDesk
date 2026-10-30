@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TeamDesk.Api.Entities.enums;
 
-namespace TeamDesk.Api.Dtos
+namespace TeamDesk.Api.Dtos.Requests
 {
     public class RequestDtos
     {
@@ -44,5 +44,14 @@ namespace TeamDesk.Api.Dtos
 
         // Réponse paginée générique : réutilisable pour n'importe quelle liste
         public record PagedResult<T>(List<T> Items, int TotalCount, int Page, int PageSize);
+
+
+        public record AssignRequestDto([Range(1, int.MaxValue)] int AssignedToId);
+
+        public record CommentCreateDto([Required, MaxLength(1000)] string Content);
+
+
+        public record StatusCountDto(string Status, int Count);
+        public record DashboardDto(int Total, List<StatusCountDto> ByStatus);
     }
 }

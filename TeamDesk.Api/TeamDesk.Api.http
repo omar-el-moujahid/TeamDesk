@@ -1,6 +1,82 @@
-@TeamDesk.Api_HostAddress = http://localhost:5266
+@host = https://localhost:7216
 
-GET {{TeamDesk.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. Login Manager → attendu 200 + token
+# @name loginManager
+POST {{host}}/api/auth/login
+Content-Type: application/json
 
-###
+{ "email": "karim@teamdesk.local", "password": "Passw0rd!" }
+
+### 2. Login User → attendu 200 + token
+# @name loginUser
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "sara@teamdesk.local", "password": "Passw0rd!" }
+
+### 3. Mauvais mot de passe → attendu 401
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "sara@teamdesk.local", "password": "faux" }
+
+### 4. Liste sans token → attendu 401
+GET {{host}}/api/requests
+
+### 5. Liste avec token User → attendu 200
+GET {{host}}/api/requests?page=1&pageSize=10
+Authorization: Bearer {{loginUser.response.body.$.token}}
+
+### 6. Détail d'une demande → attendu 200
+GET {{host}}/api/requests/1
+Authorization: Bearer {{loginUser.response.body.$.token}}
+
+### 7. User crée une demande → attendu 201
+POST {{host}}/api/requests
+Authorization: Bearer {{loginUser.response.body.$.token}}
+Content-Type: application/json
+
+{ "title": "Nouvel écran", "description": "Mon écran ne s'allume plus", "categoryId": 1, "priority": "High" }
+
+### 8. User essaie d'assigner → attendu 403
+PUT {{host}}/api/requests/1/assign
+Authorization: Bearer {{loginUser.response.body.$.token}}
+Content-Type: application/json
+
+{ "assignedToId": 2 }
+
+### 9. Manager assigne la demande 1 à Sara (Id 2) → attendu 204
+PUT {{host}}/api/requests/1/assign
+Authorization: Bearer {{loginManager.response.body.$.token}}
+Content-Type: application/json
+
+{ "assignedToId": 2 }
+
+### 10. Sara (assignée) change le statut → attendu 204
+PATCH {{host}}/api/requests/1/status
+Authorization: Bearer {{loginUser.response.body.$.token}}
+Content-Type: application/json
+
+{ "status": "InProgress" }
+
+### 11. Commentaire → attendu 201
+POST {{host}}/api/requests/1/comments
+Authorization: Bearer {{loginUser.response.body.$.token}}
+Content-Type: application/json
+
+{ "content": "Je m'en occupe." }
+
+### 12. Commentaire sur une demande inexistante → attendu 404
+POST {{host}}/api/requests/999/comments
+Authorization: Bearer {{loginUser.response.body.$.token}}
+Content-Type: application/json
+
+{ "content": "Test" }
+
+### 13. Dashboard en User → attendu 403
+GET {{host}}/api/dashboard
+Authorization: Bearer {{loginUser.response.body.$.token}}
+
+### 14. Dashboard en Manager → attendu 200
+GET {{host}}/api/dashboard
+Authorization: Bearer {{loginManager.response.body.$.token}}

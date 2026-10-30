@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TeamDesk.Api.Data;
-using TeamDesk.Api.Dtos;
 using TeamDesk.Api.Entities;
 using TeamDesk.Api.Entities.enums;
-using static TeamDesk.Api.Dtos.RequestDtos;
+using static TeamDesk.Api.Dtos.Requests.RequestDtos;
 
-namespace TeamDesk.Api.Serveur
+namespace TeamDesk.Api.Services
 {
     public class RequestService : IRequestService
     {
@@ -88,6 +87,72 @@ namespace TeamDesk.Api.Serveur
             request.Status = status;               // EF Core détecte le changement
             await _context.SaveChangesAsync();     // UPDATE uniquement sur la colonne Status
             return true;
+        }
+
+        public async Task<OperationResult> AssignAsync(int requestId, int assignedToId)
+        {
+            var request = await _context.Requests.FindAsync(requestId);       // FindAsync : cherche par clé primaire (vérifie d'abord le cache du DbContext)
+            if (request is null) return OperationResult.NotFound;
+
+            var userExists = await _context.Users.AnyAsync(u => u.Id == assignedToId); // AnyAsync → SQL "EXISTS" : ne charge pas l'utilisateur
+            if (!userExists) return OperationResult.Invalid;
+
+            request.AssignedToId = assignedToId;   // entité suivie (tracking) : EF détecte le changement
+            await _context.SaveChangesAsync();          // génère un UPDATE uniquement sur la colonne modifiée
+            return OperationResult.Success;
+        }
+
+        public async Task<OperationResult> UpdateStatusAsync(int requestId, RequestStatus status, int userId, bool isManager)
+        {
+            var request = await _context.Requests.FindAsync(requestId);
+            if (request is null) return OperationResult.NotFound;
+
+            // Règle métier : seul un Manager OU la personne assignée peut changer le statut
+            if (!isManager && request.AssignedToId != userId) return OperationResult.Forbidden;
+
+            request.Status = status;
+            await _context.SaveChangesAsync();
+            return OperationResult.Success;
+        }
+
+        public async Task<CommentDto?> AddCommentAsync(int requestId, string content, int authorId)
+        {
+            var exists = await _context.Requests.AnyAsync(r => r.Id == requestId);
+            if (!exists) return null;              // le contrôleur traduira en 404
+
+            var comment = new Comment
+            {
+                Content = content,
+                CreatedAt = DateTime.UtcNow,       // UTC en base, conversion à l'affichage côté Angular
+                RequestId = requestId,
+                AuthorId = authorId                // vient du token, jamais du client
+            };
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();          // après ça, comment.Id est rempli par SQL Server (IDENTITY)
+
+            var authorName = await _context.Users
+                .Where(u => u.Id == authorId)
+                .Select(u => u.Name)               // projection : on ne lit que la colonne Name
+                .FirstAsync();
+
+            return new CommentDto(comment.Id, comment.Content, authorName, comment.CreatedAt);
+        }
+
+        public async Task<DashboardDto> GetDashboardAsync()
+        {
+            var counts = await _context.Requests
+                .GroupBy(r => r.Status)                                   // → SQL : GROUP BY Status
+                .Select(g => new { Status = g.Key, Count = g.Count() })   // → SELECT Status, COUNT(*)
+                .ToListAsync();                                           // le calcul est fait par SQL Server, pas en mémoire
+
+            // Un statut sans demande n'apparaît pas dans le GROUP BY : on complète avec 0
+            var byStatus = Enum.GetValues<RequestStatus>()
+                .Select(s => new StatusCountDto(
+                    s.ToString(),
+                    counts.FirstOrDefault(c => c.Status == s)?.Count ?? 0))
+                .ToList();
+
+            return new DashboardDto(byStatus.Sum(x => x.Count), byStatus);
         }
     }
 }
