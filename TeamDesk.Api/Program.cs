@@ -6,18 +6,30 @@ using System.Text;
 using System.Text.Json.Serialization;
 using TeamDesk.Api.Data;
 using TeamDesk.Api.Entities;
+using TeamDesk.Api.Middlewares;
 using TeamDesk.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ================= SERVICES (avant Build) =================
 
+// Contrôleurs + enums envoyés en texte dans le JSON ("New" au lieu de 0)
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
 builder.Services.AddOpenApi();
+
+// Base de données
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Services métier
 builder.Services.AddScoped<IRequestService, RequestService>();
+builder.Services.AddScoped<IAuthService, AuthService>();      // Scoped car il utilise le DbContext (Scoped)
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>(); // sans état → Singleton
+
+// Authentification JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -35,19 +47,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
-builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>(); // sans état → Singleton
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();   // Scoped car il utilise le DbContext (Scoped)
+// CORS : seule l'application Angular (localhost:4200) peut appeler l'API depuis un navigateur
+builder.Services.AddCors(options =>
+    options.AddPolicy("AngularDev", policy =>
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()                 // nécessaire pour l'en-tête Authorization (JWT)
+              .AllowAnyMethod()));              // GET, POST, PUT, PATCH...
 
-builder.Services.AddControllers()
-    .AddJsonOptions(o =>
-        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())); // enums ↔ texte dans le JSON
-
-
+// ================= PIPELINE (après Build) =================
 var app = builder.Build();
-Console.WriteLine(new PasswordHasher<User>().HashPassword(null!, "1234"));
 
-// Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();       // 1. en premier : attrape toutes les erreurs
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -58,8 +69,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseCors("AngularDev");                      // 2. avant l'auth : le preflight OPTIONS n'a pas de token
+app.UseAuthentication();                        // 3. qui es-tu ?
+app.UseAuthorization();                         // 4. as-tu le droit ?
 app.MapControllers();
 
 app.Run();
