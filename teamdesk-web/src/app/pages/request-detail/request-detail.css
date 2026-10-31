@@ -1,0 +1,6 @@
+:host { display: block; max-width: 700px; margin: 20px auto; }
+.comment { border-left: 3px solid #ccc; padding: 4px 10px; margin: 8px 0; }
+.comment p { margin: 4px 0 0; }
+textarea { width: 100%; display: block; margin: 8px 0; }
+.error { color: #c0392b; }
+.assign { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 12px 0; padding: 10px; background: #f4f6f8; border-radius: 6px; }

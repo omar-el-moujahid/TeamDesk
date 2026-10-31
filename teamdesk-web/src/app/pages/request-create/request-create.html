@@ -1,0 +1,51 @@
+<a routerLink="/requests">← Retour à la liste</a>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="form">
+  <h2>Nouvelle demande</h2>
+
+  <label>
+    Titre
+    <input formControlName="title" maxlength="200">
+  </label>
+  @if (invalid('title')) {
+    <small class="error">Le titre est requis (200 caractères maximum).</small>
+  }
+
+  <label>
+    Description
+    <textarea formControlName="description" rows="5"></textarea>
+  </label>
+  @if (invalid('description')) {
+    <small class="error">La description est requise.</small>
+  }
+
+  <label>
+    Catégorie
+    <select formControlName="categoryId">
+      <option [ngValue]="0" disabled>— Choisir une catégorie —</option>
+      @for (c of categories(); track c.id) {
+        <option [ngValue]="c.id">{{ c.name }}</option>
+      }
+    </select>
+  </label>
+  @if (invalid('categoryId')) {
+    <small class="error">Choisissez une catégorie.</small>
+  }
+
+  <label>
+    Priorité
+    <select formControlName="priority">
+      @for (p of priorities; track p) {
+        <option [ngValue]="p">{{ p }}</option>
+      }
+    </select>
+  </label>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <button type="submit" [disabled]="submitting()">
+    {{ submitting() ? 'Création…' : 'Créer la demande' }}
+  </button>
+</form>

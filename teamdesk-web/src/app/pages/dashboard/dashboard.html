@@ -1,0 +1,21 @@
+<h2>Tableau de bord</h2>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+@if (data(); as d) {
+  <p class="total">{{ d.total }} demande(s) au total</p>
+
+  @for (s of d.byStatus; track s.status) {
+    <div class="row">
+      <span class="label">{{ s.status }}</span>
+      <div class="bar-bg">
+        <div class="bar" [class]="'bar status-' + s.status" [style.width.%]="percent(s.count)"></div>
+      </div>
+      <span class="count">{{ s.count }} ({{ percent(s.count) }} %)</span>
+    </div>
+  }
+} @else if (!error()) {
+  <p>Chargement…</p>
+}

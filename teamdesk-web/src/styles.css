@@ -1,1 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
+body { font-family: system-ui, Arial, sans-serif; margin: 0; color: #222; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+th { background: #f4f6f8; }
+button { padding: 6px 12px; cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.5; }
+input, textarea, select { padding: 6px; font: inherit; }
+.error { color: #c0392b; }
+
+.badge { padding: 2px 8px; border-radius: 10px; font-size: 0.85rem; }
+.status-New { background: #d6e9ff; }
+.status-InProgress { background: #fff1c2; }
+.status-Resolved { background: #d4f5dd; }
+.status-Closed { background: #e2e2e2; }

@@ -54,6 +54,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()                 // nécessaire pour l'en-tête Authorization (JWT)
               .AllowAnyMethod()));              // GET, POST, PUT, PATCH...
 
+builder.Services.AddScoped<ILookupService, LookupService>();
 // ================= PIPELINE (après Build) =================
 var app = builder.Build();
 

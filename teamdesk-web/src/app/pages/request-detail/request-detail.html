@@ -1,0 +1,69 @@
+<a routerLink="/requests">← Retour à la liste</a>
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+@if (request(); as r) {
+  <h2>{{ r.title }}</h2>
+  <p>{{ r.description }}</p>
+
+  <ul>
+    <li>Catégorie : {{ r.categoryName }}</li>
+    <li>Priorité : {{ r.priority }}</li>
+    <li>Créée par {{ r.createdByName }} le {{ r.createdAt | date:'dd/MM/yyyy HH:mm' }}</li>
+    <li>Assignée à : {{ r.assignedToName ?? 'personne' }}</li>
+  </ul>
+
+  <!-- Assignation : visible seulement pour un Manager -->
+  @if (isManager()) {
+    <div class="assign">
+      <label>
+        Assigner à :
+        <select #assignSelect>
+          <option value="">— Choisir —</option>
+          @for (u of users(); track u.id) {
+            <option [value]="u.id">{{ u.name }} ({{ u.role }})</option>
+          }
+        </select>
+      </label>
+      <button (click)="assign(assignSelect)">Assigner</button>
+      @if (assignMessage()) {
+        <p>{{ assignMessage() }}</p>
+      }
+    </div>
+  }
+
+  <label>
+    Statut :
+    <select #statusSelect (change)="changeStatus(statusSelect)">
+      @for (s of statuses; track s) {
+        <option [value]="s" [selected]="s === r.status">{{ s }}</option>
+      }
+    </select>
+  </label>
+  @if (statusMessage()) {
+    <p>{{ statusMessage() }}</p>
+  }
+
+  <h3>Commentaires ({{ r.comments.length }})</h3>
+  @for (c of r.comments; track c.id) {
+    <div class="comment">
+      <strong>{{ c.authorName }}</strong> · {{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}
+      <p>{{ c.content }}</p>
+    </div>
+  } @empty {
+    <p>Aucun commentaire.</p>
+  }
+
+  <textarea [formControl]="commentControl" rows="3" placeholder="Votre commentaire…"></textarea>
+  @if (commentControl.touched && commentControl.invalid) {
+    <small class="error">Le commentaire est requis (1000 caractères maximum).</small>
+  }
+  @if (commentError()) {
+    <p class="error">{{ commentError() }}</p>
+  }
+  <button (click)="addComment()">Ajouter</button>
+}

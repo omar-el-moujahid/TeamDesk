@@ -1,18 +1,25 @@
-<router-outlet />
 <header>
   <h1>{{ title }}</h1>
+
   @if (auth.isLoggedIn()) {
-    <span>{{ auth.user()?.name }} ({{ auth.user()?.role }})</span>
-    <button (click)="auth.logout()">Déconnexion</button>
+    <nav>
+      <a routerLink="/requests" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Demandes</a>
+
+      @if (!auth.isManager()) {
+        <a routerLink="/requests/new" routerLinkActive="active">Nouvelle demande</a>
+      }
+      @if (auth.isManager()) {
+        <a routerLink="/dashboard" routerLinkActive="active">Tableau de bord</a>
+      }
+    </nav>
+
+    <div class="user">
+      <span>{{ auth.user()?.name }} ({{ auth.user()?.role }})</span>
+      <button (click)="auth.logout()">Déconnexion</button>
+    </div>
   }
 </header>
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
-
-<router-outlet />
+<main>
+  <router-outlet />
+</main>

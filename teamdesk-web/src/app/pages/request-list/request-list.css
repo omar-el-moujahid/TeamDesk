@@ -1,0 +1,2 @@
+.toolbar { display: flex; justify-content: space-between; align-items: center; }
+.pagination { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 16px; }
