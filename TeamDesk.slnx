@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="TeamDesk.Api/TeamDesk.Api.csproj" />
+  <Project Path="TeamDesk.Tests/TeamDesk.Tests.csproj" />
 </Solution>
