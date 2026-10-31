@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "TeamDesk_Dev123!"            # mot de passe de DÉVELOPPEMENT uniquement
+    ports:
+      - "1433:1433"
+    healthcheck:                                       # "la base est-elle prête ?"
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 10
+      start_period: 20s
+
+  api:
+    build: ./TeamDesk.Api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development              # garde Swagger
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=TeamDesk;User Id=sa;Password=TeamDesk_Dev123!;TrustServerCertificate=True"
+      ApplyMigrationsOnStartup: "true"
+    ports:
+      - "5000:8080"                                    # port de ton PC : port du conteneur
+    depends_on:
+      db:
+        condition: service_healthy                     # attend que SQL Server soit prêt
+
+  web:
+    build: ./teamdesk-web
+    ports:
+      - "4200:80"
+    depends_on:
+      - api

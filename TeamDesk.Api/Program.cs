@@ -58,6 +58,13 @@ builder.Services.AddScoped<ILookupService, LookupService>();
 // ================= PIPELINE (après Build) =================
 var app = builder.Build();
 
+if (app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
+{
+    using var scope = app.Services.CreateScope();          // le DbContext est Scoped : il faut un scope
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();                                 // applique les migrations (et le seed HasData)
+}
+
 app.UseMiddleware<ExceptionMiddleware>();       // 1. en premier : attrape toutes les erreurs
 
 if (app.Environment.IsDevelopment())
