@@ -1,0 +1,26 @@
+<h2>Demandes ({{ totalCount() }})</h2>
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else {
+  <table>
+    <thead>
+      <tr><th>Titre</th><th>Statut</th><th>Priorité</th><th>Catégorie</th><th>Créée le</th></tr>
+    </thead>
+    <tbody>
+      @for (r of requests(); track r.id) {
+        <tr>
+          <td>{{ r.title }}</td>
+          <td>{{ r.status }}</td>
+          <td>{{ r.priority }}</td>
+          <td>{{ r.categoryName }}</td>
+          <td>{{ r.createdAt | date:'dd/MM/yyyy' }}</td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5">Aucune demande.</td></tr>
+      }
+    </tbody>
+  </table>
+}

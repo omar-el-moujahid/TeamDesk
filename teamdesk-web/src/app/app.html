@@ -1,0 +1,18 @@
+<router-outlet />
+<header>
+  <h1>{{ title }}</h1>
+  @if (auth.isLoggedIn()) {
+    <span>{{ auth.user()?.name }} ({{ auth.user()?.role }})</span>
+    <button (click)="auth.logout()">Déconnexion</button>
+  }
+</header>
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+
+
+<router-outlet />

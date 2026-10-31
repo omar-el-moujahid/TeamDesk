@@ -24,6 +24,7 @@ namespace TeamDesk.Api.Controllers
 
         // GET /api/requests?status=New&page=1&pageSize=10
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<PagedResult<RequestListItemDto>>> GetAll(
             [FromQuery] RequestStatus? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
